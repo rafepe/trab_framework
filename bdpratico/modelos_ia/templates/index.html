@@ -1,0 +1,50 @@
+{% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% bootstrap_messages %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Modelos IA - Dashboard</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Dashboard de Modelos de IA</h1>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h3>Gerenciamento de Dados</h3>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <a href="{% url 'importar_dados' %}" class="btn btn-primary">Importar Dados</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'exportar_dados' %}" class="btn btn-success">Exportar Dados</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'listar_dados' %}" class="btn btn-info">Listar Dados</a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="col-md-6">
+                <h3>Treinamento de Modelos</h3>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <a href="{% url 'treinar_svm' %}" class="btn btn-warning">Treinar SVM</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'treinar_knn' %}" class="btn btn-warning">Treinar KNN</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'treinar_rf' %}" class="btn btn-warning">Treinar Random Forest</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

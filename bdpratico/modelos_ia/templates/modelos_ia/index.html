@@ -1,0 +1,41 @@
+{% extends 'modelos_ia/base.html' %}
+
+{% block title %}Dashboard - Modelos IA{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Gerenciamento de Dados</h4>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'importar_dados' %}" class="btn btn-primary">Importar Dados</a>
+                    <a href="{% url 'exportar_dados' %}" class="btn btn-success">Exportar Dados</a>
+                    <a href="{% url 'listar_dados' %}" class="btn btn-info">Listar Dados</a>
+                    <a href="{% url 'limpar_dados' %}" class="btn btn-danger" 
+                       onclick="return confirm('Tem certeza que deseja limpar todos os dados?')">
+                        Limpar Dados
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h4>Treinamento de Modelos</h4>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'treinar_svm' %}" class="btn btn-warning">Treinar SVM</a>
+                    <a href="{% url 'treinar_knn' %}" class="btn btn-warning">Treinar KNN</a>
+                    <a href="{% url 'treinar_rf' %}" class="btn btn-warning">Treinar Random Forest</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

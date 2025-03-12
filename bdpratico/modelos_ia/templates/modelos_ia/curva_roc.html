@@ -1,0 +1,14 @@
+{% extends 'modelos_ia/base.html' %}
+
+{% block title %}Curva ROC - {{ modelo }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4>Curva ROC - {{ modelo }}</h4>
+    </div>
+    <div class="card-body">
+        {{ graph|safe }}
+    </div>
+</div>
+{% endblock %}

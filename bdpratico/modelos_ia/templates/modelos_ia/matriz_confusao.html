@@ -1,0 +1,36 @@
+{% extends 'modelos_ia/base.html' %}
+{% load custom_filters %}
+
+{% block title %}Matriz de Confusão - {{ modelo }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4>Matriz de Confusão - {{ modelo }}</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th></th>
+                        {% for label in labels %}
+                        <th class="text-center">Previsto: {{ label }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in matriz %}
+                    <tr>
+                        <th>Real: {{ labels|index:forloop.counter0 }}</th>
+                        {% for cell in row %}
+                        <td class="text-center">{{ cell }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

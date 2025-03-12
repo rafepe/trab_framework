@@ -1,0 +1,27 @@
+{% extends 'modelos_ia/base.html' %}
+
+{% block title %}Importar Dados de Vinhos{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Importar Dados de Vinhos (CSV)</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" action="{% url 'importar_dados_save' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="arquivo_csv" class="form-label">Selecione o arquivo CSV</label>
+                        <input type="file" class="form-control" id="arquivo_csv" name="arquivo_csv" accept=".csv" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Importar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

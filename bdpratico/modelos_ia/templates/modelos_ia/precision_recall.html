@@ -1,0 +1,14 @@
+{% extends 'modelos_ia/base.html' %}
+
+{% block title %}Curva Precision-Recall - {{ modelo }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4>Curva Precision-Recall - {{ modelo }}</h4>
+    </div>
+    <div class="card-body">
+        {{ graph|safe }}
+    </div>
+</div>
+{% endblock %}

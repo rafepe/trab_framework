@@ -1,0 +1,56 @@
+{% extends 'modelos_ia/base.html' %}
+
+{% block title %}Resultado do Treinamento{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h4>Resultado do Treinamento - {{ modelo }}</h4>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tbody>
+                        <tr>
+                            <th>Acurácia:</th>
+                            <td>{{ acuracia }}%</td>
+                        </tr>
+                        <tr>
+                            <th>Sensibilidade:</th>
+                            <td>{{ sensibilidade }}%</td>
+                        </tr>
+                        <tr>
+                            <th>Especificidade:</th>
+                            <td>{{ especificidade }}%</td>
+                        </tr>
+                        <tr>
+                            <th>Recall:</th>
+                            <td>{{ recall }}%</td>
+                        </tr>
+                        <tr>
+                            <th>Precision:</th>
+                            <td>{{ precision }}%</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="mt-4">
+                    <h6>Visualizações:</h6>
+                    <div class="d-grid gap-2">
+                        {% if modelo == 'Random Forest' %}
+                            <a href="{% url 'matriz_confusao' 'rf' %}" class="btn btn-primary">Ver Matriz de Confusão</a>
+                            <a href="{% url 'curva_roc' 'rf' %}" class="btn btn-success">Ver Curva ROC</a>
+                            <a href="{% url 'precision_recall' 'rf' %}" class="btn btn-info">Ver Curva Precision-Recall</a>
+                        {% else %}
+                            <a href="{% url 'matriz_confusao' modelo|lower %}" class="btn btn-primary">Ver Matriz de Confusão</a>
+                            <a href="{% url 'curva_roc' modelo|lower %}" class="btn btn-success">Ver Curva ROC</a>
+                            <a href="{% url 'precision_recall' modelo|lower %}" class="btn btn-info">Ver Curva Precision-Recall</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

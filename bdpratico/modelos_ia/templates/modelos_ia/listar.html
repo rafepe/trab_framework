@@ -1,0 +1,51 @@
+{% extends 'modelos_ia/base.html' %}
+
+{% block title %}Lista de Dados{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4>Dados dos Vinhos</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Fixed Acidity</th>
+                        <th>Volatile Acidity</th>
+                        <th>Citric Acid</th>
+                        <th>Residual Sugar</th>
+                        <th>Chlorides</th>
+                        <th>Free SO2</th>
+                        <th>Total SO2</th>
+                        <th>Density</th>
+                        <th>pH</th>
+                        <th>Sulphates</th>
+                        <th>Alcohol</th>
+                        <th>Quality</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dado in dados %}
+                    <tr>
+                        <td>{{ dado.fixed_acidity }}</td>
+                        <td>{{ dado.volatile_acidity }}</td>
+                        <td>{{ dado.citric_acid }}</td>
+                        <td>{{ dado.residual_sugar }}</td>
+                        <td>{{ dado.chlorides }}</td>
+                        <td>{{ dado.free_sulfur_dioxide }}</td>
+                        <td>{{ dado.total_sulfur_dioxide }}</td>
+                        <td>{{ dado.density }}</td>
+                        <td>{{ dado.pH }}</td>
+                        <td>{{ dado.sulphates }}</td>
+                        <td>{{ dado.alcohol }}</td>
+                        <td>{{ dado.quality }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
