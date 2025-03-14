@@ -16,15 +16,16 @@
                 <p style="width:300px;">Modelos de IA</p>
                 <div style="border-style: ridge; border-radius: 10px; width: 300px;">
                     <br>
-                    <p><input type="text" name="username" class="border-top-0" placeholder="User Name" style="width:250px;"> </p>
-                    <input type="password" name="password" class="border-top-0" placeholder="Password" style="width:250px;"> </p>
-                    <p></p>
-                    <input type="submit" value="Submit" class="btn btn-info"></p> 
+                    <p><input type="text" name="username" class="border-top-0" placeholder="User Name" style="width:250px;"></p>
+                    <p><input type="password" name="password" class="border-top-0" placeholder="Password" style="width:250px;"></p>
+                    <p><input type="submit" value="Submit" class="btn btn-info"></p>
                     <br>
-                    {{msg}}
+                    {% if msg %}
+                    <p style="color: red;">{{msg}}</p>
+                    {% endif %}
                 </div>
             </center>
         </form>
+        <br><br>
     </body>
-    <br><br>
 </html>
