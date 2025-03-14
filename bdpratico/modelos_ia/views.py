@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from .models import DadosVinho
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -13,21 +14,45 @@ import joblib
 import csv
 import os
 from django.conf import settings
+from django.contrib.auth import authenticate, login, logout
 
-# No início do arquivo, adicione esta constante
+# Pasta para salvar os modelos
 MODELS_DIR = os.path.join(settings.BASE_DIR, 'modelos_ia', 'modelos')
-
-# Certifique-se de que o diretório existe
 os.makedirs(MODELS_DIR, exist_ok=True)
 
-def index(request):
+def index(request):    
+    if request.method == 'GET':
+        return render(request, 'modelos_ia/login.html')
+        
+    usuario = request.POST.get('username')
+    senha = request.POST.get('password')
+    user = authenticate(username=usuario, password=senha)
+    if (user is not None):
+        login(request, user)
+        request.session['username'] = usuario
+        request.session['password'] = senha
+        request.session['usernamefull'] = user.get_full_name()
+        print(request.session['username'])
+        print(request.session['password'])
+        print(request.session['usernamefull'])
+        return redirect('modelos_index')
+    else:
+        data = {}
+        if (usuario):
+            data['msg'] = "Usuário ou Senha Incorretos " + usuario
+        return render(request, 'modelos_ia/login.html', data)
+
+@login_required
+def modelos_index(request):
     """View principal do dashboard"""
     return render(request, 'modelos_ia/index.html')
 
+@login_required
 def importar_dados(request):
     """Página para upload de arquivo CSV"""
     return render(request, 'modelos_ia/importar.html')
 
+@login_required
 def importar_dados_save(request):
     """Processa o arquivo CSV enviado e salva no banco"""
     if request.method == 'POST' and request.FILES.get('arquivo_csv'):
@@ -59,6 +84,7 @@ def importar_dados_save(request):
         return redirect('listar_dados')
     return redirect('importar_dados')
 
+@login_required
 def exportar_dados(request):
     """Exporta dados do banco para CSV"""
     dados = DadosVinho.objects.all()
@@ -88,6 +114,7 @@ def exportar_dados(request):
     
     return response
 
+@login_required
 def listar_dados(request):
     """Lista todos os dados do banco"""
     dados = DadosVinho.objects.all()
@@ -162,6 +189,7 @@ def _calcular_metricas(y_true, y_pred):
         'precision': round(precision * 100, 2)
     }
 
+@login_required
 def treinar_svm(request):
     """Treina o modelo SVM"""
     X_train_scaled, X_test_scaled, y_train, y_test, scaler = _preparar_dados()
@@ -185,6 +213,7 @@ def treinar_svm(request):
         **metricas
     })
 
+@login_required
 def treinar_knn(request):
     """Treina o modelo KNN"""
     X_train_scaled, X_test_scaled, y_train, y_test, scaler = _preparar_dados()
@@ -215,6 +244,7 @@ def treinar_knn(request):
         **metricas
     })
 
+@login_required
 def treinar_random_forest(request):
     """Treina o modelo Random Forest"""
     X_train_scaled, X_test_scaled, y_train, y_test, scaler = _preparar_dados()
@@ -238,6 +268,7 @@ def treinar_random_forest(request):
         **metricas
     })
 
+@login_required
 def matriz_confusao(request, modelo):
     """Gera e exibe a matriz de confusão"""
     X_train_scaled, X_test_scaled, y_train, y_test, _ = _preparar_dados()
@@ -264,6 +295,7 @@ def matriz_confusao(request, modelo):
         'modelo': modelo.upper()
     })
 
+@login_required
 def curva_roc(request, modelo):
     """Gera e exibe a curva ROC para classificação multiclasse"""
     X_train_scaled, X_test_scaled, y_train, y_test, _ = _preparar_dados()
@@ -322,6 +354,7 @@ def curva_roc(request, modelo):
         'modelo': modelo.upper()
     })
 
+@login_required
 def precision_recall(request, modelo):
     """Gera e exibe a curva Precision-Recall para classificação multiclasse"""
     X_train_scaled, X_test_scaled, y_train, y_test, _ = _preparar_dados()
@@ -372,9 +405,15 @@ def precision_recall(request, modelo):
         'modelo': modelo.upper()
     })
 
+@login_required
 def limpar_dados(request):
     """Limpa todos os dados do banco"""
     DadosVinho.objects.all().delete()
     return redirect('modelos_index')
+
+def logout_view(request):
+    """View para fazer logout do usuário"""
+    logout(request)
+    return redirect('modelos_login')
 
 

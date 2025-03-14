@@ -6,18 +6,14 @@
 <!doctype html>
 <html>
     <head>
-        <title>Pessoas</title>
+        <title>Modelos de IA</title>
     </head>
     <body>
-        <center>
-            <br><br><br><br>
-            <img src="{% static 'pagina1.jpg' %}" class="img-fluid" alt="Teste" width="15%">
-            <br><br>
-        </center>
-        <form method="POST" action="{% url 'index1' %}">
+        <br> <br> <br> <br>
+        <form method="POST" action="{% url 'modelos_login' %}">
             {% csrf_token %}
             <center>
-                <p style="width:300px;">Bem Vindo ao Site de Pessoas!!!!</p>
+                <p style="width:300px;">Modelos de IA</p>
                 <div style="border-style: ridge; border-radius: 10px; width: 300px;">
                     <br>
                     <p><input type="text" name="username" class="border-top-0" placeholder="User Name" style="width:250px;"> </p>
