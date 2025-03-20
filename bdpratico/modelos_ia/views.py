@@ -1,20 +1,32 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+from django.conf import settings
 from .models import DadosVinho
+
+# Bibliotecas para processamento de dados e machine learning
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import confusion_matrix, roc_curve, precision_recall_curve, auc, accuracy_score, precision_score, recall_score
+from sklearn.metrics import (
+    confusion_matrix, 
+    roc_curve, 
+    precision_recall_curve, 
+    auc, 
+    accuracy_score, 
+    precision_score, 
+    recall_score
+)
 import plotly.graph_objects as go
+
+# Bibliotecas para manipulação de arquivos e sistema
 import joblib
 import csv
 import os
-from django.conf import settings
-from django.contrib.auth import authenticate, login, logout
 
 # Pasta para salvar os modelos
 MODELS_DIR = os.path.join(settings.BASE_DIR, 'modelos_ia', 'modelos')
@@ -135,6 +147,7 @@ def _preparar_dados():
     X = df[feature_columns]
     y = df['quality']
     
+    # Divide os dados em treino e teste
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     
     return X_train, X_test, y_train, y_test
@@ -182,7 +195,9 @@ def _calcular_metricas(y, y_pred):
         'sensibilidade': round(sensibilidade_media * 100, 2),
         'especificidade': round(especificidade_media * 100, 2),
         'recall': round(recall * 100, 2),
-        'precision': round(precision * 100, 2)
+        'precision': round(precision * 100, 2),
+        'total_amostras': len(y),
+        'classes_unicas': len(set(y))
     }
 
 @login_required
@@ -197,7 +212,7 @@ def treinar_svm(request):
     model_path = os.path.join(MODELS_DIR, 'svm_model.pkl')
     joblib.dump(svm, model_path)
     
-    # Calcula todas as métricas
+    # Calcula todas as métricas usando apenas os dados de teste
     y_pred = svm.predict(X_test)
     metricas = _calcular_metricas(y_test, y_pred)
     
@@ -223,7 +238,7 @@ def treinar_knn(request):
     model_path = os.path.join(MODELS_DIR, 'knn_model.pkl')
     joblib.dump(knn, model_path)
     
-    # Calcula todas as métricas
+    # Calcula todas as métricas usando apenas os dados de teste
     y_pred = knn.predict(X_test)
     metricas = _calcular_metricas(y_test, y_pred)
     
@@ -244,7 +259,7 @@ def treinar_random_forest(request):
     model_path = os.path.join(MODELS_DIR, 'rf_model.pkl')
     joblib.dump(rf, model_path)
     
-    # Calcula todas as métricas
+    # Calcula todas as métricas usando apenas os dados de teste
     y_pred = rf.predict(X_test)
     metricas = _calcular_metricas(y_test, y_pred)
     
@@ -266,7 +281,7 @@ def matriz_confusao(request, modelo):
     # Prepara os dados para a matriz de confusão
     X_train, X_test, y_train, y_test = _preparar_dados()
     
-    # Gera previsões
+    # Gera previsões apenas para os dados de teste
     y_pred = model.predict(X_test)
     
     # Calcula matriz de confusão
@@ -294,7 +309,7 @@ def curva_roc(request, modelo):
     # Prepara os dados para a curva ROC
     X_train, X_test, y_train, y_test = _preparar_dados()
     
-    # Gera probabilidades para cada classe
+    # Gera probabilidades para cada classe usando apenas dados de teste
     y_pred_prob = model.predict_proba(X_test)
     
     # Cria gráfico com plotly
@@ -354,7 +369,7 @@ def precision_recall(request, modelo):
     # Prepara os dados para a curva Precision-Recall
     X_train, X_test, y_train, y_test = _preparar_dados()
     
-    # Gera probabilidades para cada classe
+    # Gera probabilidades para cada classe usando apenas dados de teste
     y_pred_prob = model.predict_proba(X_test)
     
     # Cria gráfico com plotly
