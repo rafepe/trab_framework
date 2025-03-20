@@ -88,6 +88,7 @@ def importar_dados_save(request):
 def exportar_dados(request):
     """Exporta dados do banco para CSV"""
     dados = DadosVinho.objects.all()
+    print(len(dados))
     
     # Cria arquivo CSV em memória
     response = HttpResponse(content_type='text/csv')
@@ -136,24 +137,19 @@ def _preparar_dados():
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     
-    # Criar e aplicar o scaler apenas para SVM e Random Forest
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-    
-    return X_train_scaled, X_test_scaled, y_train, y_test, scaler
+    return X_train, X_test, y_train, y_test
 
-def _calcular_metricas(y_true, y_pred):
+def _calcular_metricas(y, y_pred):
     """Calcula todas as métricas de avaliação"""
     # Acurácia
-    accuracy = accuracy_score(y_true, y_pred)
+    accuracy = accuracy_score(y, y_pred)
     
     # Precision e Recall (média para multiclasse)
-    precision = precision_score(y_true, y_pred, average='weighted', zero_division=0)
-    recall = recall_score(y_true, y_pred, average='weighted', zero_division=0)
+    precision = precision_score(y, y_pred, average='weighted', zero_division=0)
+    recall = recall_score(y, y_pred, average='weighted', zero_division=0)
     
     # Matriz de confusão para calcular sensibilidade e especificidade
-    cm = confusion_matrix(y_true, y_pred)
+    cm = confusion_matrix(y, y_pred)
     
     # Para multiclasse, calculamos a média das sensibilidades e especificidades
     sensibilidades = []
@@ -192,20 +188,17 @@ def _calcular_metricas(y_true, y_pred):
 @login_required
 def treinar_svm(request):
     """Treina o modelo SVM"""
-    X_train_scaled, X_test_scaled, y_train, y_test, scaler = _preparar_dados()
+    X_train, X_test, y_train, y_test = _preparar_dados()
     
     svm = SVC(probability=True, random_state=42)
-    svm.fit(X_train_scaled, y_train)
+    svm.fit(X_train, y_train)
     
     # Salva o modelo usando caminho absoluto
     model_path = os.path.join(MODELS_DIR, 'svm_model.pkl')
-    scaler_path = os.path.join(MODELS_DIR, 'svm_scaler.pkl')
-    
     joblib.dump(svm, model_path)
-    joblib.dump(scaler, scaler_path)
     
     # Calcula todas as métricas
-    y_pred = svm.predict(X_test_scaled)
+    y_pred = svm.predict(X_test)
     metricas = _calcular_metricas(y_test, y_pred)
     
     return render(request, 'modelos_ia/resultado_treino.html', {
@@ -216,11 +209,7 @@ def treinar_svm(request):
 @login_required
 def treinar_knn(request):
     """Treina o modelo KNN"""
-    X_train_scaled, X_test_scaled, y_train, y_test, scaler = _preparar_dados()
-    
-    # Para KNN, vamos usar os dados não escalonados
-    X_train = scaler.inverse_transform(X_train_scaled)
-    X_test = scaler.inverse_transform(X_test_scaled)
+    X_train, X_test, y_train, y_test = _preparar_dados()
     
     knn = KNeighborsClassifier(
         n_neighbors=5,
@@ -232,7 +221,6 @@ def treinar_knn(request):
     
     # Salva o modelo usando caminho absoluto
     model_path = os.path.join(MODELS_DIR, 'knn_model.pkl')
-    
     joblib.dump(knn, model_path)
     
     # Calcula todas as métricas
@@ -247,20 +235,17 @@ def treinar_knn(request):
 @login_required
 def treinar_random_forest(request):
     """Treina o modelo Random Forest"""
-    X_train_scaled, X_test_scaled, y_train, y_test, scaler = _preparar_dados()
+    X_train, X_test, y_train, y_test = _preparar_dados()
     
     rf = RandomForestClassifier(n_estimators=100, random_state=42)
-    rf.fit(X_train_scaled, y_train)
+    rf.fit(X_train, y_train)
     
-    # Salva o modelo usando caminho absoluto (usando 'rf' em vez de 'random forest')
+    # Salva o modelo usando caminho absoluto
     model_path = os.path.join(MODELS_DIR, 'rf_model.pkl')
-    scaler_path = os.path.join(MODELS_DIR, 'rf_scaler.pkl')
-    
     joblib.dump(rf, model_path)
-    joblib.dump(scaler, scaler_path)
     
     # Calcula todas as métricas
-    y_pred = rf.predict(X_test_scaled)
+    y_pred = rf.predict(X_test)
     metricas = _calcular_metricas(y_test, y_pred)
     
     return render(request, 'modelos_ia/resultado_treino.html', {
@@ -271,8 +256,6 @@ def treinar_random_forest(request):
 @login_required
 def matriz_confusao(request, modelo):
     """Gera e exibe a matriz de confusão"""
-    X_train_scaled, X_test_scaled, y_train, y_test, _ = _preparar_dados()
-    
     # Ajusta o nome do modelo para o arquivo
     modelo_arquivo = 'rf' if modelo == 'random forest' else modelo
     
@@ -280,8 +263,11 @@ def matriz_confusao(request, modelo):
     model_path = os.path.join(MODELS_DIR, f'{modelo_arquivo}_model.pkl')
     model = joblib.load(model_path)
     
+    # Prepara os dados para a matriz de confusão
+    X_train, X_test, y_train, y_test = _preparar_dados()
+    
     # Gera previsões
-    y_pred = model.predict(X_test_scaled)
+    y_pred = model.predict(X_test)
     
     # Calcula matriz de confusão
     cm = confusion_matrix(y_test, y_pred)
@@ -298,8 +284,6 @@ def matriz_confusao(request, modelo):
 @login_required
 def curva_roc(request, modelo):
     """Gera e exibe a curva ROC para classificação multiclasse"""
-    X_train_scaled, X_test_scaled, y_train, y_test, _ = _preparar_dados()
-    
     # Ajusta o nome do modelo para o arquivo
     modelo_arquivo = 'rf' if modelo == 'random forest' else modelo
     
@@ -307,8 +291,11 @@ def curva_roc(request, modelo):
     model_path = os.path.join(MODELS_DIR, f'{modelo_arquivo}_model.pkl')
     model = joblib.load(model_path)
     
+    # Prepara os dados para a curva ROC
+    X_train, X_test, y_train, y_test = _preparar_dados()
+    
     # Gera probabilidades para cada classe
-    y_pred_prob = model.predict_proba(X_test_scaled)
+    y_pred_prob = model.predict_proba(X_test)
     
     # Cria gráfico com plotly
     fig = go.Figure()
@@ -357,8 +344,6 @@ def curva_roc(request, modelo):
 @login_required
 def precision_recall(request, modelo):
     """Gera e exibe a curva Precision-Recall para classificação multiclasse"""
-    X_train_scaled, X_test_scaled, y_train, y_test, _ = _preparar_dados()
-    
     # Ajusta o nome do modelo para o arquivo
     modelo_arquivo = 'rf' if modelo == 'random forest' else modelo
     
@@ -366,8 +351,11 @@ def precision_recall(request, modelo):
     model_path = os.path.join(MODELS_DIR, f'{modelo_arquivo}_model.pkl')
     model = joblib.load(model_path)
     
+    # Prepara os dados para a curva Precision-Recall
+    X_train, X_test, y_train, y_test = _preparar_dados()
+    
     # Gera probabilidades para cada classe
-    y_pred_prob = model.predict_proba(X_test_scaled)
+    y_pred_prob = model.predict_proba(X_test)
     
     # Cria gráfico com plotly
     fig = go.Figure()
